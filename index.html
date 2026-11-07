@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>立冬快乐</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{background:#101c2b;color:#fff;font-family:"Songti SC","SimSun",serif}canvas{position:absolute;inset:0;width:100%;height:100%}.content{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;pointer-events:none}.inner{transform:translateY(-2vh);padding:20px}.eyebrow{font-family:sans-serif;font-size:11px;letter-spacing:5px;color:#e4bba9}.line{width:36px;height:1px;background:#e6b5a4;margin:22px auto}h1{font-weight:400;font-size:clamp(48px,8vw,92px);letter-spacing:12px;margin:0 0 20px;text-shadow:0 0 30px #e9b2a766}p{font-size:16px;letter-spacing:3px;line-height:2;color:#f3e5df;margin:0}.hint{position:absolute;bottom:8%;width:100%;text-align:center;font:12px sans-serif;letter-spacing:2px;color:#e8d0c6aa;pointer-events:none}.seal{display:inline-flex;margin-top:27px;border:1px solid #e6b5a4aa;color:#f4d4c7;width:36px;height:36px;align-items:center;justify-content:center;font-size:15px}button{position:absolute;right:24px;top:24px;background:#ffffff12;color:#f8e4dc;border:1px solid #ffffff44;border-radius:50%;width:42px;height:42px;font-size:19px;cursor:pointer}button:hover{background:#ffffff25}@media(max-width:600px){h1{font-size:52px;letter-spacing:8px}p{font-size:14px;letter-spacing:2px}.hint{bottom:6%}}
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div class="content"><div class="inner"><div class="eyebrow">THE BEGINNING OF WINTER</div><div class="line"></div><h1>立冬快乐</h1><p>愿这个冬天<br>有人与你共黄昏，有人问你粥可温</p><span class="seal">冬</span></div></div>
+<div class="hint">轻触屏幕，落下一点心意</div>
+<button id="wish" aria-label="送出爱心" title="送出爱心">♡</button>
+<script>
+const canvas=document.querySelector('#scene'),ctx=canvas.getContext('2d');let w,h,dpr,flakes=[],stars=[],hearts=[];
+function resize(){w=innerWidth;h=innerHeight;dpr=Math.min(devicePixelRatio||1,2);canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);stars=Array.from({length:90},()=>({x:Math.random()*w,y:Math.random()*h*.75,r:Math.random()*1.3+.2,a:Math.random()*Math.PI*2}));flakes=Array.from({length:Math.min(130,Math.floor(w/8))},()=>flake(true))}
+function flake(initial){return{x:Math.random()*w,y:initial?Math.random()*h:-10,r:Math.random()*2.5+.7,s:Math.random()*.8+.35,drift:Math.random()*2,phase:Math.random()*6}}
+function heart(x,y,size){hearts.push({x,y,size,life:1,vx:(Math.random()-.5)*1.8,vy:-Math.random()*1.5-.8})}
+function burst(x,y){for(let i=0;i<16;i++)heart(x+(Math.random()-.5)*55,y+(Math.random()-.5)*35,Math.random()*9+5)}
+function drawHeart(x,y,s){ctx.beginPath();ctx.moveTo(x,y+s*.3);ctx.bezierCurveTo(x-s,y-s*.35,x-s*.55,y-s,x,y-s*.45);ctx.bezierCurveTo(x+s*.55,y-s,x+s,y-s*.35,x,y+s*.3);ctx.fill()}
+let t=0;function frame(){t++;let bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#0d1829');bg.addColorStop(.62,'#263548');bg.addColorStop(1,'#68515a');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+// A quiet moon behind the snowfall.
+let mx=w*.78,my=h*.2,mr=Math.min(w,h)*.065;let glow=ctx.createRadialGradient(mx,my,mr*.2,mx,my,mr*3);glow.addColorStop(0,'#f7dbbd55');glow.addColorStop(1,'#f7dbbd00');ctx.fillStyle=glow;ctx.fillRect(mx-mr*3,my-mr*3,mr*6,mr*6);ctx.fillStyle='#f8e5cd';ctx.beginPath();ctx.arc(mx,my,mr,0,Math.PI*2);ctx.fill();
+stars.forEach(s=>{ctx.globalAlpha=.25+.5*(.5+.5*Math.sin(t*.018+s.a));ctx.fillStyle='#fff4e5';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,7);ctx.fill()});ctx.globalAlpha=1;
+// Layered snow hills anchor the scene.
+ctx.fillStyle='#c8c9d0';ctx.beginPath();ctx.moveTo(0,h*.89);ctx.quadraticCurveTo(w*.28,h*.77,w*.56,h*.91);ctx.quadraticCurveTo(w*.8,h*.98,w,h*.84);ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.fill();ctx.fillStyle='#e5dce0';ctx.beginPath();ctx.moveTo(0,h*.95);ctx.quadraticCurveTo(w*.35,h*.86,w*.65,h*.96);ctx.quadraticCurveTo(w*.85,h*1.01,w,h*.94);ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.fill();
+flakes.forEach((f,i)=>{f.y+=f.s;f.x+=Math.sin(t*.01+f.phase)*.35;ctx.fillStyle='rgba(255,255,255,.8)';ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,7);ctx.fill();if(f.y>h+10)flakes[i]=flake(false)});hearts=hearts.filter(a=>a.life>0);hearts.forEach(a=>{a.x+=a.vx;a.y+=a.vy;a.life-=.009;ctx.globalAlpha=a.life;ctx.fillStyle='#f6aaa9';drawHeart(a.x,a.y,a.size)});ctx.globalAlpha=1;requestAnimationFrame(frame)}
+resize();addEventListener('resize',resize);addEventListener('pointerdown',e=>{if(e.target.tagName!=='BUTTON')burst(e.clientX,e.clientY)});document.querySelector('#wish').addEventListener('click',()=>burst(w/2,h*.65));frame();
+setTimeout(()=>burst(w/2,h*.66),350);
+setInterval(()=>heart(Math.random()*w,h*.82,Math.random()*8+5),450);
+setInterval(()=>burst(w*(.2+Math.random()*.6),h*(.55+Math.random()*.18)),5000);
+</script>
+</body>
+</html>
